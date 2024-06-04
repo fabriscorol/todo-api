@@ -55,11 +55,12 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
 	try {
 		const task = await Task.findById(req.params.id);
+
 		if (task == null) {
 			return res.status(404).json({ message: 'Tâche non trouvée' });
 		}
 
-		await task.remove();
+		await task.deleteOne();
 		res.json({ message: 'Tâche supprimée' });
 	} catch (err) {
 		res.status(500).json({ message: err.message });
