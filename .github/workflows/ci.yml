@@ -1,0 +1,42 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: todo-api
+
+      - name: Run tests
+        run: npm test
+        working-directory: todo-api
+
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          echo "machine api.heroku.com login $HEROKU_EMAIL password $HEROKU_API_KEY" > ~/.netrc
+          echo "machine git.heroku.com login $HEROKU_EMAIL password $HEROKU_API_KEY" >> ~/.netrc
+          git remote add heroku https://git.heroku.com/$HEROKU_APP_NAME.git
+          git push heroku main
